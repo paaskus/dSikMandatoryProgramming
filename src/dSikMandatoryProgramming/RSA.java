@@ -10,7 +10,7 @@ public class RSA {
 	
 	public static void main(String[] args) {
 		RSA rsa = new RSA();
-		rsa.keyGen(16);
+		rsa.keyGen(128);
 		System.out.println("n = "+rsa.getN());
 		BigInteger message = new BigInteger("100");
 		System.out.println("Message: "+message);
@@ -31,7 +31,7 @@ public class RSA {
 	}
 	
 	/**
-	 * @precondition: k >= 8
+	 * @precondition: k >= 128
 	 */
 	public void keyGen (int k) {
 		Random random = new Random();
@@ -46,17 +46,18 @@ public class RSA {
 		BigInteger one = new BigInteger("1");
 
 		while ((n = p.multiply(q)).bitLength() != k) {
-			q = new BigInteger(bitLengthOfQ, random);
-			while(!(q.subtract(one)).gcd(e).equals(one)) {
+			do {
 				q = new BigInteger(bitLengthOfQ, random);
-			}
-			p = new BigInteger(bitLengthOfP, random);
-			while(!(p.subtract(one)).gcd(e).equals(one)) {
+			} while (!(q.subtract(one)).gcd(e).equals(one));
+
+			do {
 				p = new BigInteger(bitLengthOfP, random);
-			}
+			} while (!(p.subtract(one)).gcd(e).equals(one));
 			n = p.multiply(q);
 		}
+		
 		BigInteger phiOfN = p.subtract(one).multiply(q.subtract(one));
+		System.out.println("phiOfN: "+phiOfN);
 		d = e.modInverse(phiOfN);
 		System.out.println("Benny: "+d.multiply(e).mod(phiOfN));
 	}
