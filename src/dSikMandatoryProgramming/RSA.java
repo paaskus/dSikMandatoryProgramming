@@ -4,69 +4,85 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 public class RSA {
-	private BigInteger e = new BigInteger("3");
+	private static final BigInteger e = new BigInteger("3");
+	private static final BigInteger zero = BigInteger.ZERO;
+	private static final BigInteger one = BigInteger.ONE;
+	private int k = 2000;
 	private BigInteger d, n = null;
-	private BigInteger zero = BigInteger.ZERO;
-	private BigInteger one = BigInteger.ONE;
 
+	/*
+	 * Automatically 'tests' this RSA-implementation on all strings given as arguments.
+	 * Remember: The arguments have to be numbers.
+	 */
 	public static void main(String[] args) {
 		RSA rsa = new RSA(2000);
-		BigInteger message = new BigInteger("99999999999999999999999999");
-		System.out.println("message: " + message);
-		System.out.println("bitlength of message: " + message.bitLength());
-		// encrypt and decrypt the message
-		rsa.decrypt(rsa.encrypt(message));
+		for (int i = 0; i < args.length; i++) {
+			BigInteger message = new BigInteger(args[i]);
+			BigInteger encryptedMessage = rsa.encrypt(message);
+			BigInteger decryptedMessage = rsa.decrypt(encryptedMessage);
+			System.out.println("message: " + message);
+			System.out.println("encrypted message: " + encryptedMessage);
+			System.out.println("decrypted message: " + decryptedMessage);
+			if (i != args.length - 1) System.out.println("\n");
+		}
 	}
 
-	public RSA(int k) {
-		this.keyGen(k);
+	public RSA(int bitLength) {
+		this.k = bitLength;
+		this.keyGen();
 	}
 
-	public BigInteger decrypt(BigInteger c) {
-		// c^d mod n
-		BigInteger decrypted = c.modPow(d, n);
-		System.out.println("decrypted msg: " + decrypted);
-		return decrypted;
-	}
-
-	// 0 <= numToEncrypt <= n-1
-	public BigInteger encrypt(BigInteger m) {
-		// c = m^e mod n
-		BigInteger c = m.modPow(e, n);
-		System.out.println("encrypted msg: " + c);
-		return c;
-	}
-
-	/**
-	 * @precondition: k >= 2000
+	/*
+	 * Decrypts the cipher.
+	 * Returns c^d mod n.
 	 */
-	private void keyGen(int k) {
-		int bitLengthOfQ = k / 2;
-		int bitLengthOfP = k - bitLengthOfQ;
+	public BigInteger decrypt(BigInteger c) {
+		return c.modPow(d, n);
+	}
 
-		BigInteger q;
-		BigInteger p;
-		BigInteger qMinusOne;
-		BigInteger pMinusOne;
-		boolean correctBitLength;
-		boolean isInvertible;
+	/*
+	 * Encrypts the message.
+	 * Returns c = m^e mod n.
+	 * Precondition: 0 <= m <= n-1.
+	 */
+	public BigInteger encrypt(BigInteger m) {
+		return m.modPow(e, n);
+	}
 
-		// bitlength of n should equal k
+	/*
+	 * First generates n (of bit length k), then calculates d based on the prime factors of n.
+	 */
+	private void keyGen() {
+		// Bitlengths
+		int bitLengthOfP = k / 2;
+		int bitLengthOfQ = k - bitLengthOfP;
+		
+		// Variables
+		BigInteger q, p, qMinusOne, pMinusOne;
+		boolean bitLengthIsTooShort, isNotInvertible;
+		
+		// Choosing the right p and q
 		do {
-			q = rsaPrime(bitLengthOfQ);
 			p = rsaPrime(bitLengthOfP);
-			qMinusOne = q.subtract(one);
+			q = rsaPrime(bitLengthOfQ);
 			pMinusOne = p.subtract(one);
-			isInvertible = qMinusOne.multiply(pMinusOne).mod(e).equals(zero);
-			
+			qMinusOne = q.subtract(one);
 			n = p.multiply(q);
-			correctBitLength = n.bitLength() == k;
-		} while (!correctBitLength  || isInvertible);
+			
+			// (q-1)(p-1) should not be divisible by e
+			isNotInvertible = qMinusOne.multiply(pMinusOne).mod(e).equals(zero);
+			
+			// bitlength of n should equal k
+			bitLengthIsTooShort = n.bitLength() < k;
+		} while (bitLengthIsTooShort || isNotInvertible);
 
-		// d = e^{-1} mod (p-1)(q-1)
+		// Calculating d, where d = e^{-1} mod (p-1)(q-1)
 		d = e.modInverse(qMinusOne.multiply(pMinusOne));
 	}
 	
+	/*
+	 * Generates a random prime 'p' of specified bit length where gcd(p-1, e) = 1.
+	 */
 	private BigInteger rsaPrime(int bitLength) {
 		BigInteger prime;
 		SecureRandom random = new SecureRandom();
