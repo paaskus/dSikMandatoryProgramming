@@ -10,8 +10,8 @@ public class RSA {
 	private BigInteger one = BigInteger.ONE;
 
 	public static void main(String[] args) {
-		RSA rsa = new RSA(100);
-		BigInteger message = new BigInteger("100");
+		RSA rsa = new RSA(2000);
+		BigInteger message = new BigInteger("99999999999999999999999999");
 		System.out.println("message: " + message);
 		System.out.println("bitlength of message: " + message.bitLength());
 		// encrypt and decrypt the message
@@ -41,42 +41,38 @@ public class RSA {
 	 * @precondition: k >= 2000
 	 */
 	private void keyGen(int k) {
-		SecureRandom random = new SecureRandom();
-
 		int bitLengthOfQ = k / 2;
 		int bitLengthOfP = k - bitLengthOfQ;
 
-		BigInteger q = new BigInteger(bitLengthOfQ, 100, random);
-		BigInteger p = new BigInteger(bitLengthOfP, 100, random);
+		BigInteger q;
+		BigInteger p;
+		BigInteger qMinusOne;
+		BigInteger pMinusOne;
+		boolean correctBitLength;
+		boolean isInvertible;
 
 		// bitlength of n should equal k
-		while ((n = p.multiply(q)).bitLength() != k  || q.subtract(one).multiply(p.subtract(one)).mod(e).equals(zero)) {
-			// ensure that gcd(q-1, e) == 1
-			do {
-				q = new BigInteger(bitLengthOfQ, 100, random);
-			} while (!(q.subtract(one)).gcd(e).equals(one));
-
-			// ensure that gcd(p-1, e) == 1
-			do {
-				p = new BigInteger(bitLengthOfP, 100, random);
-			} while (!(p.subtract(one)).gcd(e).equals(one));
-
-			// n = p*q
+		do {
+			q = rsaPrime(bitLengthOfQ);
+			p = rsaPrime(bitLengthOfP);
+			qMinusOne = q.subtract(one);
+			pMinusOne = p.subtract(one);
+			isInvertible = qMinusOne.multiply(pMinusOne).mod(e).equals(zero);
+			
 			n = p.multiply(q);
-		}
-		
-		System.out.println("bitlength of n: " + n.bitLength());
-
-		System.out.println("q: " + q);
-		System.out.println("p: " + p);
-		System.out.println("n: " + n);
+			correctBitLength = n.bitLength() == k;
+		} while (!correctBitLength  || isInvertible);
 
 		// d = e^{-1} mod (p-1)(q-1)
-		BigInteger qMinusOne = q.subtract(one);
-		System.out.println("qMinusOne: " + qMinusOne);
-		BigInteger pMinusOne = p.subtract(one);
-		System.out.println("pMinusOne: " + pMinusOne);
-		System.out.println("pq mod e: "+qMinusOne.multiply(pMinusOne).mod(e));
 		d = e.modInverse(qMinusOne.multiply(pMinusOne));
+	}
+	
+	private BigInteger rsaPrime(int bitLength) {
+		BigInteger prime;
+		SecureRandom random = new SecureRandom();
+		do {
+			prime = new BigInteger(bitLength, 100, random);
+		} while (!(prime.subtract(one)).gcd(e).equals(one));
+		return prime;
 	}
 }
