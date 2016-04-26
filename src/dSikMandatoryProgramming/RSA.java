@@ -1,6 +1,8 @@
 package dSikMandatoryProgramming;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 public class RSA {
@@ -9,6 +11,7 @@ public class RSA {
 	private static final BigInteger one = BigInteger.ONE;
 	private int k = 2000;
 	private BigInteger d, n = null;
+	private MessageDigest md = null;
 
 	/*
 	 * Automatically 'tests' this RSA-implementation on all strings given as arguments.
@@ -23,6 +26,9 @@ public class RSA {
 			System.out.println("message: " + message);
 			System.out.println("encrypted message: " + encryptedMessage);
 			System.out.println("decrypted message: " + decryptedMessage);
+			BigInteger signedMessage = rsa.sign(message);
+			boolean verified = rsa.verify(message, signedMessage);
+			System.out.println("verified: "+verified);
 			if (i != args.length - 1) System.out.println("\n");
 		}
 	}
@@ -47,6 +53,36 @@ public class RSA {
 	 */
 	public BigInteger encrypt(BigInteger m) {
 		return m.modPow(e, n);
+	}
+
+	/*
+	 * Sign m with the secret key (which means using the decrypt method).
+	 */
+	public BigInteger sign(BigInteger m) {
+		return decrypt(sha256(m));
+	}
+
+	/*
+	 * Verify that m is from an authentic source by verifying c with the public key
+	 * (which means using the encrypt method).
+	 */
+	public boolean verify(BigInteger m, BigInteger c) {
+		System.out.println("encrypted c to verify: "+encrypt(c));
+		System.out.println("m hashed: "+sha256(m));
+		return sha256(m).equals(encrypt(c));
+	}
+	
+	private BigInteger sha256(BigInteger numToHash) {
+		if (md == null) {
+			try {
+				md = MessageDigest.getInstance("SHA-256");
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+		}
+		byte[] hashed = md.digest(numToHash.toByteArray());
+		md.reset();
+		return new BigInteger(1,hashed);
 	}
 
 	/*
