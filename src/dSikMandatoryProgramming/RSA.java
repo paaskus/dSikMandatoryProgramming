@@ -67,12 +67,14 @@ public class RSA {
 	 * (which means using the encrypt method).
 	 */
 	public boolean verify(BigInteger m, BigInteger c) {
-		System.out.println("encrypted c to verify: "+encrypt(c));
-		System.out.println("m hashed: "+sha256(m));
 		return sha256(m).equals(encrypt(c));
 	}
 	
+	/*
+	 * Calculates the SHA-256 hash of the number given as argument.
+	 */
 	private BigInteger sha256(BigInteger numToHash) {
+		// Instantiate a SHA-256 MessageDigest if it is not done already
 		if (md == null) {
 			try {
 				md = MessageDigest.getInstance("SHA-256");
@@ -80,9 +82,10 @@ public class RSA {
 				e.printStackTrace();
 			}
 		}
+		// 
 		byte[] hashed = md.digest(numToHash.toByteArray());
-		md.reset();
-		return new BigInteger(1,hashed);
+		// md.reset();
+		return new BigInteger(1, hashed);
 	}
 
 	/*
@@ -97,7 +100,7 @@ public class RSA {
 		BigInteger q, p, qMinusOne, pMinusOne;
 		boolean bitLengthIsTooShort, isNotInvertible;
 		
-		// Choosing the right p and q
+		// Choosing p and q
 		do {
 			p = rsaPrime(bitLengthOfP);
 			q = rsaPrime(bitLengthOfQ);
@@ -117,7 +120,7 @@ public class RSA {
 	}
 	
 	/*
-	 * Generates a random prime 'p' of specified bit length where gcd(p-1, e) = 1.
+	 * Generates a random prime p of specified bit length where gcd(p-1, e) = 1.
 	 */
 	private BigInteger rsaPrime(int bitLength) {
 		BigInteger prime;
