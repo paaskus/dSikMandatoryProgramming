@@ -91,6 +91,8 @@ public class RSA {
 			System.out.println("message: " + message);
 			System.out.println("encrypted message: " + encryptedMessage);
 			System.out.println("decrypted message: " + decryptedMessage);
+			if (message.equals(decryptedMessage)) System.out.println("correctly encrypted/decrypted");
+			else System.out.println("failure in encryption/decryption");
 			System.out.println("================================");
 			if (i != args.length - 1) System.out.println("\n");
 		}
