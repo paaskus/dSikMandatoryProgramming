@@ -1,9 +1,16 @@
-package dSikMandatoryProgramming;
+package dSik;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Random;
 
 public class RSA {
 	private static final BigInteger e = new BigInteger("3");
@@ -11,7 +18,7 @@ public class RSA {
 	private static final BigInteger one = BigInteger.ONE;
 	private int k = 2000;
 	private BigInteger d, n = null;
-	private MessageDigest md = null;
+	private static MessageDigest md = null;
 
 	public RSA(int bitLength) {
 		this.k = bitLength;
@@ -23,6 +30,9 @@ public class RSA {
 	 * Returns c^d mod n.
 	 */
 	public BigInteger decrypt(BigInteger c) {
+		if (c.compareTo(n.subtract(one)) == 1) {
+			System.err.println("Decrypt: Cipher has a bit length longer than n-1 ("+(n.intValue()-1)+"), which will give unexpected results");
+		}
 		return c.modPow(d, n);
 	}
 
@@ -32,6 +42,9 @@ public class RSA {
 	 * Precondition: 0 <= m <= n-1.
 	 */
 	public BigInteger encrypt(BigInteger m) {
+		if (m.compareTo(n) == 1) {
+			System.err.println("Ecrypt: Message has a bit length longer than n-1 ("+(n.intValue()-1)+"), which will give unexpected results");
+		}
 		return m.modPow(e, n);
 	}
 
@@ -39,6 +52,9 @@ public class RSA {
 	 * Sign m with the secret key (which means using the decrypt method).
 	 */
 	public BigInteger sign(BigInteger m) {
+		if (m.compareTo(n) == 1) {
+			System.err.println("Sign: Message has a bit length longer than n-1 ("+(n.intValue()-1)+"), which will give unexpected results");
+		}
 		return decrypt(sha256(m));
 	}
 
@@ -47,13 +63,16 @@ public class RSA {
 	 * (which means using the encrypt method).
 	 */
 	public boolean verify(BigInteger m, BigInteger c) {
+		if (m.compareTo(n) == 1) {
+			System.err.println("Verify: Message has a bit length longer than n-1 ("+(n.intValue()-1)+"), which will give unexpected results");
+		}
 		return sha256(m).equals(encrypt(c));
 	}
 	
 	/*
 	 * Calculates the SHA-256 hash of the number given as argument.
 	 */
-	private BigInteger sha256(BigInteger numToHash) {
+	protected static BigInteger sha256(BigInteger numToHash) {
 		// Instantiate a SHA-256 MessageDigest if it is not done already
 		if (md == null) {
 			try {
@@ -64,7 +83,6 @@ public class RSA {
 		}
 		// 
 		byte[] hashed = md.digest(numToHash.toByteArray());
-		// md.reset();
 		return new BigInteger(1, hashed);
 	}
 
@@ -112,12 +130,18 @@ public class RSA {
 	}
 	
 	/*
-	 * Automatically 'tests' this RSA-implementation on all strings given as arguments.
-	 * Remember: The arguments have to be numbers.
+	 * For testing purposes only.
+	 */
+	protected int getBitLengthOfModulus() {
+		return n.bitLength();
+	}
+	
+	/*
+	 * Manually test this RSA-implementation on all strings given as arguments.
+	 * Remember: The arguments have to be numbers (less than n).
 	 */
 	public static void main(String[] args) {
 		// Only for testing; reads messages as input from program arguments
-		boolean error = false;
 		RSA rsa = new RSA(2000);
 		for (int i = 0; i < args.length; i++) {
 			if (i == 0) System.out.println("\n\n\n=== POSTIVE TEST ENCRYPT/DECRYPT AND SIGNATURES ===\n");
@@ -130,29 +154,9 @@ public class RSA {
 			System.out.println("decrypted message: " + decryptedMessage);
 			BigInteger signedMessage = rsa.sign(message);
 			boolean verified = rsa.verify(message, signedMessage);
-			if (!verified) error = false;
 			System.out.println("verified: "+verified+" <== should be 'true'");
 			System.out.println("================================");
 			if (i != args.length - 1) System.out.println("\n");
 		}
-		
-		for (int i = 0; i < args.length; i = i + 2) {
-			if (i == 0) System.out.println("\n\n\n=== NEGATIVE TEST OF SIGNATURES ===\n");
-			if (i+1 >= args.length) break;
-			System.out.println("================================");
-			BigInteger message = new BigInteger(args[i]);
-			System.out.println("message: " + message);
-			BigInteger signedMessage = rsa.sign(message);
-			BigInteger fakeSignature = rsa.sign(new BigInteger(args[i+1]));
-			System.out.println("signed message: "+signedMessage);
-			System.out.println("fake signature: "+fakeSignature);
-			boolean verified = rsa.verify(message, fakeSignature);
-			if (verified) error = false;
-			System.out.println("verified: "+verified+" <== should be 'false'");
-			System.out.println("================================");
-			if (i != args.length - 1) System.out.println("\n");
-		}
-		if (error) System.out.println("A mistake was found; the program does not work as it should.");
-		else System.out.println("No mistakes were found; the encryption/decryption and signatures worked as expected.");
 	}
 }

@@ -1,0 +1,38 @@
+Testsuite: dSik.TestRSA
+Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 43.045 sec
+------------- Standard Output ---------------
+
+=============================
+Length of 10kb random numbers: 10000
+Resulting hash: 7485223312510329828224860212820855000379914483437474171575633288512268717658
+Bits hashed per second: 75388060.04
+It took 1061175ns to hash 10kb
+=============================
+
+
+=============================
+Length of 1992 bits of random numbers: 249
+Resulting hash: 19636839229019890175218107628449430652116401373195681141623704902437712467219987839839088215360770056961892041766196213037042279696867648415508033835119994269197995118913407220356870374328509187805297674819662279795218124191200368274744028445100859569288426267203576428668460228101651451808913617086588720339463539795214241723204979146268796011058949010308604742022790331908507829028090086523791298558633281931117892501957462968396529324509714737498714990341088019757687691877032707757624800438586386726137056815353711630881817536228141648150063088693523804586312907818034800073942755258004235909064804
+Bits hashed and signed per second: 35075.01
+It took 56792579ns to hash and sign 1992 bits
+=============================
+
+------------- ---------------- ---------------
+
+Testcase: using1000BitRSAShouldGenerateModulusOfBitLength1000 took 3.862 sec
+Testcase: messageAndEcryptedMessageShouldBeDifferent2 took 0.386 sec
+Testcase: messageAndEcryptedMessageShouldBeDifferent3 took 3.108 sec
+Testcase: shouldVerifyACorrectlySignedMessage took 2.301 sec
+Testcase: shouldBeAbleToDecryptAnEncryptedMessage took 2.866 sec
+Testcase: messageAndEcryptedMessageShouldBeDifferent took 2.117 sec
+Testcase: shouldNotVerifyAWronglySignedMessage2 took 1.526 sec
+Testcase: shouldNotVerifyAWronglySignedMessage3 took 2.93 sec
+Testcase: shouldNotVerifyAWronglySignedMessage4 took 3.313 sec
+Testcase: timeHashingOf10KbBigIntegerInBitsPerSecond took 2.595 sec
+Testcase: timeCreatingRSASignatureUsing2000BitRSAKey took 1.9 sec
+Testcase: shouldNotVerifyAWronglySignedMessage took 0.364 sec
+Testcase: using2000BitRSAShouldGenerateModulusOfBitLength2000 took 2.745 sec
+Testcase: shouldBeAbleToDecryptAnEncryptedMessage2 took 2.124 sec
+Testcase: shouldBeAbleToDecryptAnEncryptedMessage3 took 2.092 sec
+Testcase: shouldVerifyACorrectlySignedMessage2 took 7.051 sec
+Testcase: shouldVerifyACorrectlySignedMessage3 took 1.741 sec
