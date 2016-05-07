@@ -71,6 +71,7 @@ public class TestRSA {
 	}
 	
 	// Not used currently
+	@SuppressWarnings("unused")
 	private void create10kbFile() {
 		try {
 			String fileName = "10kbFile.txt";
